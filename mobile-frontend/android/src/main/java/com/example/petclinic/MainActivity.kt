@@ -5,21 +5,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.petclinic.data.model.Owner
-import com.example.petclinic.data.network.ApiResult
-import com.example.petclinic.data.repository.PetClinicRepository
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.petclinic.navigation.Screen
+import com.example.petclinic.navigation.bottomNavItems
+import com.example.petclinic.ui.screen.*
 import com.example.petclinic.ui.theme.PetClinicTheme
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,169 +25,101 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PetClinicTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                PetClinicApp()
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
-    val repository = remember { PetClinicRepository() }
-    val scope = rememberCoroutineScope()
-    var ownersState by remember { mutableStateOf<ApiResult<List<Owner>>?>(null) }
+fun PetClinicApp() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
     
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Pet Clinic",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            Text(
-                text = "Mobile App",
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            
-            Button(
-                onClick = {
-                    scope.launch {
-                        repository.getOwners().collect { result ->
-                            ownersState = result
-                        }
-                    }
-                },
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                Text("Load Owners")
-            }
-            
-            // Display owners result
-            when (val state = ownersState) {
-                is ApiResult.Loading -> {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator()
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text("Loading owners...")
-                        }
-                    }
-                }
-                is ApiResult.Success -> {
-                    val owners = state.data
-                    Text(
-                        text = "Owners (${owners.size})",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(owners) { owner ->
-                            OwnerCard(owner = owner)
-                        }
-                    }
-                }
-                is ApiResult.Error -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            Text(
-                                text = "Error",
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                            Text(
-                                text = state.exception.message ?: "Unknown error",
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        }
-                    }
-                }
-                null -> {
-                    Text(
-                        text = "Tap 'Load Owners' to fetch data from the Pet Clinic API",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+    Scaffold(
+        bottomBar = {
+            // Only show bottom nav for main screens
+            if (currentRoute in bottomNavItems.map { it.route }) {
+                PetClinicBottomNavigation(
+                    navController = navController,
+                    currentRoute = currentRoute
+                )
             }
         }
-    }
-}
-
-@Composable
-fun OwnerCard(owner: Owner) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Home.route,
+            modifier = Modifier.padding(innerPadding)
         ) {
-            Text(
-                text = "${owner.firstName} ${owner.lastName}",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = owner.address,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = owner.city,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "Phone: ${owner.telephone}",
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (owner.pets.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Pets: ${owner.pets.size}",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.secondary
+            composable(Screen.Home.route) {
+                HomeScreen()
+            }
+            
+            composable(Screen.Owners.route) {
+                OwnersScreen(
+                    onOwnerClick = { ownerId ->
+                        navController.navigate(Screen.OwnerDetail.createRoute(ownerId))
+                    },
+                    onAddOwnerClick = {
+                        navController.navigate(Screen.AddOwner.route)
+                    }
+                )
+            }
+            
+            composable(Screen.Vets.route) {
+                VetsScreen()
+            }
+            
+            composable(Screen.OwnerDetail.route) { backStackEntry ->
+                val ownerId = backStackEntry.arguments?.getString("ownerId")?.toIntOrNull() ?: 0
+                OwnerDetailScreen(
+                    ownerId = ownerId,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+            
+            composable(Screen.AddOwner.route) {
+                AddOwnerScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun MainScreenPreview() {
-    PetClinicTheme {
-        MainScreen()
+fun PetClinicBottomNavigation(
+    navController: NavHostController,
+    currentRoute: String?
+) {
+    NavigationBar {
+        bottomNavItems.forEach { screen ->
+            NavigationBarItem(
+                icon = { Icon(screen.icon, contentDescription = screen.title) },
+                label = { Text(screen.title) },
+                selected = currentRoute == screen.route,
+                onClick = {
+                    if (currentRoute != screen.route) {
+                        navController.navigate(screen.route) {
+                            // Pop up to the start destination to avoid building up a large stack
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
+                            // Avoid multiple copies of the same destination
+                            launchSingleTop = true
+                            // Restore state when reselecting a previously selected item
+                            restoreState = true
+                        }
+                    }
+                }
+            )
+        }
     }
 }

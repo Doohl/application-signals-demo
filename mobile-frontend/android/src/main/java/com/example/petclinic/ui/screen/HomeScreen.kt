@@ -4,9 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -16,10 +17,12 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.petclinic.data.network.ApiConfig
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen() {
     val scrollState = rememberScrollState()
+    var isJanking by remember { mutableStateOf(false) }
     
     Column(
         modifier = Modifier
@@ -126,5 +129,146 @@ fun HomeScreen() {
         }
         
         Spacer(modifier = Modifier.height(32.dp))
+        
+        // Testing Buttons Section
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "⚠️ Testing & Monitoring",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "These buttons demonstrate different types of issues for Application Signals monitoring:",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    lineHeight = 20.sp
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Crash Button
+                Button(
+                    onClick = {
+                        throw RuntimeException("Intentional crash for Application Signals testing")
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("💥 Trigger App Crash")
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // ANR Button
+                Button(
+                    onClick = {
+                        // Block the main thread to cause ANR
+                        Thread.sleep(10000) // 10 seconds - will cause ANR
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFF6B00), // Orange
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("⏰ Trigger ANR (10s block)")
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // UI Jank Button
+                Button(
+                    onClick = {
+                        isJanking = !isJanking
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isJanking) Color(0xFF4CAF50) else Color(0xFFFF9800), // Green when active, Orange when inactive
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(if (isJanking) "✅ Stop UI Jank" else "🐌 Start UI Jank")
+                }
+                
+                if (isJanking) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "UI Jank is active - causing slow rendering...",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        // Jank-inducing component when active
+        if (isJanking) {
+            JankInducingComponent()
+        }
+    }
+}
+
+@Composable
+fun JankInducingComponent() {
+    // This component will cause UI jank by doing expensive operations on the main thread
+    LaunchedEffect(Unit) {
+        while (true) {
+            // Simulate expensive computation on main thread
+            val startTime = System.currentTimeMillis()
+            while (System.currentTimeMillis() - startTime < 100) {
+                // Busy wait for 100ms - this will cause frame drops
+                Math.sqrt(Math.random() * 1000000)
+            }
+            delay(50) // Small delay before next jank
+        }
+    }
+    
+    // Visual indicator that jank is happening
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Yellow.copy(alpha = 0.3f)
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator(
+                    color = Color.Red,
+                    strokeWidth = 4.dp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Causing UI Jank...",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Red
+                )
+            }
+        }
     }
 }

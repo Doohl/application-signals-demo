@@ -1,0 +1,7 @@
+{
+  "rum": {
+    "region": "YOUR-AWS-REGION",
+    "appMonitorId": "YOUR-RUM-APP-MONITOR-ID-FOR-AGENT-DEMO",
+    "cognitoIdentityPoolId": "<whatever>"
+  }
+}

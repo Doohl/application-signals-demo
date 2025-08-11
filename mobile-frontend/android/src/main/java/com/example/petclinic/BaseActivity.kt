@@ -8,13 +8,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
 import com.example.petclinic.ui.fragment.BottomNavigationFragment
 import com.example.petclinic.ui.theme.PetClinicTheme
-import software.amazon.opentelemetry.android.api.AwsRum
 
 /**
  * Base activity that provides common functionality for all activities

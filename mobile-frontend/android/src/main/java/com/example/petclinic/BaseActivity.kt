@@ -1,6 +1,5 @@
 package com.example.petclinic
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,13 +9,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.example.petclinic.ui.components.BottomNavigationBar
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentContainerView
+import com.example.petclinic.ui.fragment.BottomNavigationFragment
 import com.example.petclinic.ui.theme.PetClinicTheme
+import software.amazon.opentelemetry.android.api.AwsRum
 
 /**
  * Base activity that provides common functionality for all activities
  */
-abstract class BaseActivity : ComponentActivity() {
+abstract class BaseActivity : FragmentActivity() {
     
     /**
      * Override this to provide the content for the activity
@@ -36,16 +39,25 @@ abstract class BaseActivity : ComponentActivity() {
         
         setContent {
             PetClinicTheme {
-                val context = LocalContext.current
                 val selectedRoute = getSelectedBottomNavRoute()
                 
                 Scaffold(
                     bottomBar = {
                         selectedRoute?.let { route ->
-                            BottomNavigationBar(
-                                selectedRoute = route,
-                                onNavigate = { destination ->
-                                    navigateToActivity(destination)
+                            // Use AndroidView to embed the Fragment
+                            AndroidView(
+                                factory = { context ->
+                                    FragmentContainerView(context).apply {
+                                        id = android.view.View.generateViewId()
+                                        
+                                        // Add the BottomNavigationFragment
+                                        this@BaseActivity.supportFragmentManager.beginTransaction()
+                                            .replace(
+                                                this.id,
+                                                BottomNavigationFragment.newInstance(route)
+                                            )
+                                            .commit()
+                                    }
                                 }
                             )
                         }
@@ -56,23 +68,6 @@ abstract class BaseActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-    }
-    
-    /**
-     * Navigate to the appropriate activity based on the destination route
-     */
-    private fun navigateToActivity(route: String) {
-        val intent = when (route) {
-            "home" -> Intent(this, MainActivity::class.java)
-            "owners" -> Intent(this, OwnersActivity::class.java)
-            "vets" -> Intent(this, VetsActivity::class.java)
-            else -> return
-        }
-        
-        // Don't start the same activity we're already in
-        if (intent.component?.className != this::class.java.name) {
-            startActivity(intent)
         }
     }
 }

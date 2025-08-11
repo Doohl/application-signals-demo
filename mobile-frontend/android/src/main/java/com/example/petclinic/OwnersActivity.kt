@@ -2,6 +2,7 @@ package com.example.petclinic
 
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import com.example.petclinic.ui.fragment.AddOwnerFragment
 import com.example.petclinic.ui.screen.OwnersScreen
 
 /**
@@ -18,8 +19,10 @@ class OwnersActivity : BaseActivity() {
                 startActivity(intent)
             },
             onAddOwnerClick = {
-                val intent = Intent(this, AddOwnerActivity::class.java)
-                startActivity(intent)
+                supportFragmentManager.beginTransaction()
+                    .replace(android.R.id.content, AddOwnerFragment())
+                    .addToBackStack(null)
+                    .commit()
             }
         )
     }

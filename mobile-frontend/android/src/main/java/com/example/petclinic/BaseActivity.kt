@@ -1,5 +1,6 @@
 package com.example.petclinic
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentContainerView
+import com.example.petclinic.ui.components.BottomNavigationBar
 import com.example.petclinic.ui.fragment.BottomNavigationFragment
 import com.example.petclinic.ui.theme.PetClinicTheme
 
@@ -42,20 +44,10 @@ abstract class BaseActivity : FragmentActivity() {
                 Scaffold(
                     bottomBar = {
                         selectedRoute?.let { route ->
-                            // Use AndroidView to embed the Fragment
-                            AndroidView(
-                                factory = { context ->
-                                    FragmentContainerView(context).apply {
-                                        id = android.view.View.generateViewId()
-                                        
-                                        // Add the BottomNavigationFragment
-                                        this@BaseActivity.supportFragmentManager.beginTransaction()
-                                            .replace(
-                                                this.id,
-                                                BottomNavigationFragment.newInstance(route)
-                                            )
-                                            .commit()
-                                    }
+                            BottomNavigationBar(
+                                selectedRoute = route,
+                                onNavigate = { destination ->
+                                    navigateToActivity(destination)
                                 }
                             )
                         }
@@ -66,6 +58,19 @@ abstract class BaseActivity : FragmentActivity() {
                     }
                 }
             }
+        }
+    }
+    
+    private fun navigateToActivity(route: String) {
+        val intent = when (route) {
+            "home" -> Intent(this, MainActivity::class.java)
+            "owners" -> Intent(this, OwnersActivity::class.java)
+            "vets" -> Intent(this, VetsActivity::class.java)
+            else -> return
+        }
+        
+        if (intent.component?.className != this::class.java.name) {
+            startActivity(intent)
         }
     }
 }

@@ -2,6 +2,7 @@ package com.example.petclinic.ui.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,11 +21,17 @@ class BottomNavigationFragment : Fragment() {
     
     private var selectedRoute: String = "home"
     
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate")
+    }
+    
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "onCreateView")
         // Get the selected route from arguments
         selectedRoute = arguments?.getString(ARG_SELECTED_ROUTE) ?: "home"
         
@@ -40,6 +47,31 @@ class BottomNavigationFragment : Fragment() {
                 }
             }
         }
+    }
+    
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart")
+    }
+    
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume")
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause")
+    }
+    
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop")
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy")
     }
     
     /**
@@ -60,6 +92,7 @@ class BottomNavigationFragment : Fragment() {
     }
     
     companion object {
+        private const val TAG = "BottomNavFragment"
         private const val ARG_SELECTED_ROUTE = "selected_route"
         
         /**

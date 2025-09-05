@@ -30,7 +30,7 @@ class TelemetryGenerationTest {
 
         navigateToOwnersScreen()
         
-        navigateToVetsScreen()
+        testAddOwnerFragment()
         
         navigateToHomeScreen()
         
@@ -40,22 +40,27 @@ class TelemetryGenerationTest {
         
         performDestructiveTests()
 
+        navigateToVetsScreen()
+
         Thread.sleep(30000)
-    }
-
-    @Test()
-    fun generateCrashTelemetry() {
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText("⚠️ Testing & Monitoring").performScrollTo()
-        composeTestRule.onNodeWithText("💥 Trigger App Crash").performScrollTo()
-        composeTestRule.onNodeWithText("💥 Trigger App Crash").performClick()
-        composeTestRule.waitForIdle()
     }
 
     private fun navigateToOwnersScreen() {
         // Click on the Owners tab in bottom navigation
         composeTestRule.onNodeWithText("Owners").performClick()
+        composeTestRule.waitForIdle()
+    }
+
+    private fun testAddOwnerFragment() {
+        // Click the Add Owner FAB (FloatingActionButton with Add icon)
+        composeTestRule.onNodeWithContentDescription("Add Owner").performClick()
+        composeTestRule.waitForIdle()
+        
+        // Wait a second
+        Thread.sleep(1000)
+        
+        // Go back by clicking the back arrow
+        composeTestRule.onNodeWithContentDescription("Back").performClick()
         composeTestRule.waitForIdle()
     }
 
@@ -114,6 +119,12 @@ class TelemetryGenerationTest {
     private fun performDestructiveTests() {
         // Scroll to the testing section
         composeTestRule.onNodeWithText("⚠️ Testing & Monitoring").performScrollTo()
+        
+        // Test HTTP 500 error
+        composeTestRule.onNodeWithText("🌐 HTTP 500 Error").performScrollTo()
+        composeTestRule.onNodeWithText("🌐 HTTP 500 Error").performClick()
+        composeTestRule.waitForIdle()
+        Thread.sleep(2000) // Wait for HTTP call
         
         // Test ANR first (less destructive than crash)
         try {

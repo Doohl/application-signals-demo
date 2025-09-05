@@ -205,6 +205,32 @@ fun HomeScreen() {
                     Text(if (isJanking) "✅ Stop UI Jank" else "🐌 Start UI Jank")
                 }
                 
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // HTTP 500 Error Button
+                Button(
+                    onClick = {
+                        Thread {
+                            try {
+                                val client = okhttp3.OkHttpClient()
+                                val request = okhttp3.Request.Builder()
+                                    .url("https://httpbin.org/status/500")
+                                    .build()
+                                client.newCall(request).execute()
+                            } catch (e: Exception) {
+                                // Ignore
+                            }
+                        }.start()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF9C27B0), // Purple
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("🌐 HTTP 500 Error")
+                }
+                
                 if (isJanking) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(

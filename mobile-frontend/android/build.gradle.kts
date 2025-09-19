@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
     kotlin("plugin.serialization") version "2.1.21"
     id("net.bytebuddy.byte-buddy-gradle-plugin") version "1.17.6"
+    id("io.embrace.swazzler") version "7.9.1"
 }
 
 android {
@@ -93,4 +94,7 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // Embrace onboarding
+    implementation("io.embrace:embrace-android-sdk:7.9.1")
 }

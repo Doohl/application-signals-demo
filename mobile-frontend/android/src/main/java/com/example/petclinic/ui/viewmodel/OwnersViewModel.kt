@@ -24,10 +24,6 @@ class OwnersViewModel(
     var filteredOwners by mutableStateOf<List<Owner>>(emptyList())
         private set
     
-    init {
-        loadOwners()
-    }
-    
     fun loadOwners() {
         viewModelScope.launch {
             repository.getOwners().collect { result ->

@@ -18,7 +18,8 @@ import com.example.petclinic.data.model.PetType
 fun EditOwnerDialog(
     owner: Owner,
     onDismiss: () -> Unit,
-    onSave: (OwnerRequest) -> Unit
+    onSave: (OwnerRequest) -> Unit,
+    isLoading: Boolean = false
 ) {
     var firstName by remember { mutableStateOf(owner.firstName) }
     var lastName by remember { mutableStateOf(owner.lastName) }
@@ -26,7 +27,7 @@ fun EditOwnerDialog(
     var city by remember { mutableStateOf(owner.city) }
     var telephone by remember { mutableStateOf(owner.telephone) }
     
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(onDismissRequest = { if (!isLoading) onDismiss() }) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -45,12 +46,20 @@ fun EditOwnerDialog(
                     fontWeight = FontWeight.Bold
                 )
                 
+                if (isLoading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                
                 OutlinedTextField(
                     value = firstName,
                     onValueChange = { firstName = it },
                     label = { Text("First Name") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !isLoading
                 )
                 
                 OutlinedTextField(
@@ -58,7 +67,8 @@ fun EditOwnerDialog(
                     onValueChange = { lastName = it },
                     label = { Text("Last Name") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !isLoading
                 )
                 
                 OutlinedTextField(
@@ -66,7 +76,8 @@ fun EditOwnerDialog(
                     onValueChange = { address = it },
                     label = { Text("Address") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !isLoading
                 )
                 
                 OutlinedTextField(
@@ -74,7 +85,8 @@ fun EditOwnerDialog(
                     onValueChange = { city = it },
                     label = { Text("City") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !isLoading
                 )
                 
                 OutlinedTextField(
@@ -82,14 +94,18 @@ fun EditOwnerDialog(
                     onValueChange = { telephone = it },
                     label = { Text("Telephone") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    singleLine = true,
+                    enabled = !isLoading
                 )
                 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) {
+                    TextButton(
+                        onClick = onDismiss,
+                        enabled = !isLoading
+                    ) {
                         Text("Cancel")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
@@ -104,9 +120,17 @@ fun EditOwnerDialog(
                             )
                             onSave(ownerRequest)
                         },
-                        enabled = firstName.isNotBlank() && lastName.isNotBlank() && 
+                        enabled = !isLoading && firstName.isNotBlank() && lastName.isNotBlank() && 
                                 address.isNotBlank() && city.isNotBlank() && telephone.isNotBlank()
                     ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
                         Text("Save")
                     }
                 }

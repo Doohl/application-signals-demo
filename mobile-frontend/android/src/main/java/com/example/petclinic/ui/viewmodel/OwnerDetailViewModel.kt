@@ -1,5 +1,6 @@
 package com.example.petclinic.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -17,6 +18,10 @@ import kotlinx.coroutines.launch
 class OwnerDetailViewModel(
     private val repository: PetClinicRepository = PetClinicRepository()
 ) : ViewModel() {
+    
+    companion object {
+        private const val TAG = "OwnerDetailViewModel"
+    }
     
     var ownerState by mutableStateOf<ApiResult<Owner>?>(null)
         private set
@@ -51,16 +56,19 @@ class OwnerDetailViewModel(
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
+            Log.d(TAG, "Updating owner $ownerId with data: $ownerRequest")
             when (val result = repository.updateOwner(ownerId, ownerRequest)) {
                 is ApiResult.Success -> {
+                    Log.d(TAG, "Owner $ownerId updated successfully")
                     onSuccess()
                     loadOwnerWithVisits(ownerId) // Refresh the owner data
                 }
                 is ApiResult.Error -> {
+                    Log.e(TAG, "Failed to update owner $ownerId: ${result.exception.message}", result.exception)
                     onError(result.exception.message ?: "Unknown error")
                 }
                 is ApiResult.Loading -> {
-                    // Handle loading state if needed
+                    Log.d(TAG, "Update owner $ownerId - loading state")
                 }
             }
         }
@@ -73,16 +81,19 @@ class OwnerDetailViewModel(
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
+            Log.d(TAG, "Adding pet for owner $ownerId: $petRequest")
             when (val result = repository.addPet(ownerId, petRequest)) {
                 is ApiResult.Success -> {
+                    Log.d(TAG, "Pet added successfully for owner $ownerId")
                     onSuccess(result.data)
                     loadOwnerWithVisits(ownerId) // Refresh the owner data
                 }
                 is ApiResult.Error -> {
+                    Log.e(TAG, "Failed to add pet for owner $ownerId: ${result.exception.message}", result.exception)
                     onError(result.exception.message ?: "Unknown error")
                 }
                 is ApiResult.Loading -> {
-                    // Handle loading state if needed
+                    Log.d(TAG, "Add pet for owner $ownerId - loading state")
                 }
             }
         }

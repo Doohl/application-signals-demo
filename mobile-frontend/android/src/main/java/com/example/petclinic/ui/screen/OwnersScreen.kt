@@ -24,8 +24,14 @@ import com.example.petclinic.ui.viewmodel.OwnersViewModel
 fun OwnersScreen(
     onOwnerClick: (Int) -> Unit,
     onAddOwnerClick: () -> Unit,
-    viewModel: OwnersViewModel = viewModel()
+    viewModel: OwnersViewModel = viewModel(),
+    refreshTrigger: Int = 0
 ) {
+    // Refresh owners list when refreshTrigger changes (when activity resumes)
+    LaunchedEffect(refreshTrigger) {
+        viewModel.loadOwners()
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()

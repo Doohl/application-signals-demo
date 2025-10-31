@@ -31,6 +31,9 @@ fun OwnerDetailScreen(
 ) {
     var showEditDialog by remember { mutableStateOf(false) }
     var showAddPetDialog by remember { mutableStateOf(false) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+    var isUpdating by remember { mutableStateOf(false) }
     
     LaunchedEffect(ownerId) {
         viewModel.loadOwnerWithVisits(ownerId)
@@ -163,15 +166,28 @@ fun OwnerDetailScreen(
     if (showEditDialog && viewModel.ownerState is ApiResult.Success) {
         EditOwnerDialog(
             owner = (viewModel.ownerState as ApiResult.Success).data,
-            onDismiss = { showEditDialog = false },
+            onDismiss = { 
+                if (!isUpdating) {
+                    showEditDialog = false 
+                }
+            },
             onSave = { ownerRequest ->
+                isUpdating = true
                 viewModel.updateOwner(
                     ownerId = ownerId,
                     ownerRequest = ownerRequest,
-                    onSuccess = { showEditDialog = false },
-                    onError = { /* Handle error */ }
+                    onSuccess = { 
+                        isUpdating = false
+                        showEditDialog = false
+                    },
+                    onError = { error ->
+                        isUpdating = false
+                        errorMessage = error
+                        showErrorDialog = true
+                    }
                 )
-            }
+            },
+            isLoading = isUpdating
         )
     }
     
@@ -187,6 +203,20 @@ fun OwnerDetailScreen(
                     onSuccess = { showAddPetDialog = false },
                     onError = { /* Handle error */ }
                 )
+            }
+        )
+    }
+    
+    // Error Dialog
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text("Update Failed") },
+            text = { Text(errorMessage) },
+            confirmButton = {
+                Button(onClick = { showErrorDialog = false }) {
+                    Text("OK")
+                }
             }
         )
     }

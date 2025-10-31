@@ -41,7 +41,9 @@ object HttpClient {
         return HttpLoggingInterceptor { message ->
             Log.d(TAG, message)
         }.apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            // Use BASIC for better performance - logs URL, method, status code and time
+            // BODY logs entire request/response which is VERY slow for large responses
+            level = HttpLoggingInterceptor.Level.BASIC
         }
     }
     

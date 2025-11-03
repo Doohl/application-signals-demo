@@ -29,6 +29,12 @@ class OwnerDetailViewModel(
     var petTypesState by mutableStateOf<ApiResult<List<PetType>>?>(null)
         private set
     
+    var nutritionLoadingMap by mutableStateOf<Map<Int, Boolean>>(emptyMap())
+        private set
+    
+    var nutritionFactsMap by mutableStateOf<Map<Int, String>>(emptyMap())
+        private set
+    
     init {
         loadPetTypes()
     }
@@ -37,6 +43,33 @@ class OwnerDetailViewModel(
         viewModelScope.launch {
             repository.getOwnerWithVisits(ownerId).collect { result ->
                 ownerState = result
+                // Load nutrition for each pet
+                if (result is ApiResult.Success) {
+                    loadNutritionForPets(result.data.pets)
+                }
+            }
+        }
+    }
+    
+    private fun loadNutritionForPets(pets: List<Pet>) {
+        pets.forEach { pet ->
+            viewModelScope.launch {
+                nutritionLoadingMap = nutritionLoadingMap + (pet.id to true)
+                Log.d(TAG, "Loading nutrition for pet ${pet.id}, type: ${pet.type.name}")
+                when (val result = repository.getPetNutrition(pet.type.name)) {
+                    is ApiResult.Success -> {
+                        Log.d(TAG, "Nutrition loaded for pet ${pet.id}: ${result.data.facts}")
+                        nutritionFactsMap = nutritionFactsMap + (pet.id to result.data.facts)
+                        nutritionLoadingMap = nutritionLoadingMap + (pet.id to false)
+                    }
+                    is ApiResult.Error -> {
+                        Log.e(TAG, "Failed to load nutrition for pet ${pet.id}: ${result.exception.message}")
+                        throw RuntimeException("Nutrition API failed for pet ${pet.id}: ${result.exception.message}", result.exception)
+                    }
+                    is ApiResult.Loading -> {
+                        Log.d(TAG, "Nutrition loading for pet ${pet.id}")
+                    }
+                }
             }
         }
     }

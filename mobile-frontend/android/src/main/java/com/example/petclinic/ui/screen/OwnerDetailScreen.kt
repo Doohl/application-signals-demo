@@ -113,7 +113,11 @@ fun OwnerDetailScreen(
                         }
                     } else {
                         items(owner.pets) { pet ->
-                            PetCard(pet = pet)
+                            PetCard(
+                                pet = pet,
+                                nutritionFacts = viewModel.nutritionFactsMap[pet.id] ?: "",
+                                isLoadingNutrition = viewModel.nutritionLoadingMap[pet.id] ?: false
+                            )
                         }
                     }
                 }
@@ -258,7 +262,11 @@ fun OwnerInfoCard(owner: Owner) {
 }
 
 @Composable
-fun PetCard(pet: Pet) {
+fun PetCard(
+    pet: Pet,
+    nutritionFacts: String = "",
+    isLoadingNutrition: Boolean = false
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -288,6 +296,36 @@ fun PetCard(pet: Pet) {
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.secondary
+                )
+            }
+            
+            // Nutrition Facts Section
+            if (isLoadingNutrition) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Loading nutrition...",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else if (nutritionFacts.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Nutrition Facts",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Text(
+                    text = nutritionFacts,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

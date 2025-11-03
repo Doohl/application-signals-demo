@@ -81,4 +81,11 @@ class PetClinicRepository(
     suspend fun addVisit(ownerId: Int, petId: Int, visit: Visit): ApiResult<String> {
         return dao.addVisit(ownerId, petId, visit)
     }
+    
+    /**
+     * Get nutrition facts for a pet type
+     */
+    suspend fun getPetNutrition(petType: String): ApiResult<PetNutrition> {
+        return dao.getPetNutrition(petType)
+    }
 }

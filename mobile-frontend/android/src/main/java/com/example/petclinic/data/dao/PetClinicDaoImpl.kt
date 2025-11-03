@@ -31,6 +31,7 @@ class PetClinicDaoImpl(
     private val visitAdapter = moshi.adapter(Visit::class.java)
     private val vetListType: Type = Types.newParameterizedType(List::class.java, Vet::class.java)
     private val vetListAdapter = moshi.adapter<List<Vet>>(vetListType)
+    private val petNutritionAdapter = moshi.adapter(PetNutrition::class.java)
     
     override suspend fun getOwners(): ApiResult<List<Owner>> = withContext(Dispatchers.IO) {
         safeApiCall {
@@ -214,6 +215,21 @@ class PetClinicDaoImpl(
             
             vetListAdapter.fromJson(responseBody) 
                 ?: throw ApiException.ParseException("Failed to parse vets")
+        }
+    }
+    
+    override suspend fun getPetNutrition(petType: String): ApiResult<PetNutrition> = withContext(Dispatchers.IO) {
+        safeApiCall {
+            val request = Request.Builder()
+                .url("$baseUrl/api/nutrition/facts/$petType")
+                .get()
+                .build()
+            
+            val response = client.newCall(request).execute()
+            val responseBody = response.getBodyString()
+            
+            petNutritionAdapter.fromJson(responseBody) 
+                ?: throw ApiException.ParseException("Failed to parse pet nutrition")
         }
     }
 }

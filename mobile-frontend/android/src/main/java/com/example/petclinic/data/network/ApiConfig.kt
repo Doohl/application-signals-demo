@@ -7,7 +7,7 @@ object ApiConfig {
     
     // Default to Android emulator localhost
     // Change this to your actual API gateway URL when deploying
-    const val DEFAULT_BASE_URL = "http://a61dafdaceaa340d5b3fc9d3a00f71c6-746455772.us-east-1.elb.amazonaws.com"
+    const val DEFAULT_BASE_URL = "http://a2edd9ee7be9e4ebd8fad2fc352a4def-1349860178.us-east-1.elb.amazonaws.com"
     
     // Alternative URLs for different environments
     const val LOCALHOST_BASE_URL = "http://localhost:8080"

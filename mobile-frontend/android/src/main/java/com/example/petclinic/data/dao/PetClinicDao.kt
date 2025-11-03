@@ -28,4 +28,7 @@ interface PetClinicDao {
     
     // Vet operations
     suspend fun getVets(): ApiResult<List<Vet>>
+    
+    // Nutrition operations
+    suspend fun getPetNutrition(petType: String): ApiResult<PetNutrition>
 }

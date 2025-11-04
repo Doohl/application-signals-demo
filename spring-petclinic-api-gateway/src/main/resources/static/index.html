@@ -15,7 +15,7 @@
                 '{{AWS_RUM_MONITOR_ID}}',
                 '1.0.0',
                 '{{REGION}}',
-                'https://client.rum.us-east-1.amazonaws.com/1.19.x/cwr.js',
+                'https://client.rum.us-east-1.amazonaws.com/1.25.x/cwr.js',
                 {
                     sessionSampleRate: 1,
                     identityPoolId: "{{AWS_RUM_IDENTITY_POOL_ID}}",
@@ -35,7 +35,8 @@
                     cookieAttributes: {
                         secure: false
                     },
-                    enableXRay: true
+                    enableXRay: true,
+                    enableW3CTraceId: true,
                 }
             );
         </script>

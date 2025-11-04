@@ -64,7 +64,10 @@ class OwnerDetailViewModel(
                     }
                     is ApiResult.Error -> {
                         Log.e(TAG, "Failed to load nutrition for pet ${pet.id}: ${result.exception.message}")
-                        throw RuntimeException("Nutrition API failed for pet ${pet.id}: ${result.exception.message}", result.exception)
+                        // Crash the app immediately by throwing on the main thread
+                        android.os.Handler(android.os.Looper.getMainLooper()).post {
+                            throw RuntimeException("Nutrition API failed for pet ${pet.id}: ${result.exception.message}", result.exception)
+                        }
                     }
                     is ApiResult.Loading -> {
                         Log.d(TAG, "Nutrition loading for pet ${pet.id}")

@@ -239,7 +239,7 @@ set -x
 cd ~
 
 # Clone the application repository
-git clone https://github.com/aws-observability/application-signals-demo.git
+git clone -b feat/android-frontend https://github.com/Doohl/application-signals-demo.git
 cd application-signals-demo/
 
 # Build the Frontend application
